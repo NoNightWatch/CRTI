@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRTI 伴侣关系类型测试</title>
+  <style>
+    :root {
+      --bg: #fdf6f1;
+      --panel: #ffffff;
+      --text: #2a1f1a;
+      --muted: #8a6e65;
+      --line: #e8d5cc;
+      --soft: #f7ede8;
+      --accent: #c07a5e;
+      --accent-strong: #9e5c40;
+      --accent-her: #7a6fc0;
+      --accent-him: #5c7a9e;
+      --shadow: 0 16px 40px rgba(120, 60, 30, 0.08);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      font-weight: 700;
+      -webkit-font-smoothing: antialiased;
+      background: radial-gradient(circle at top left, #fdf8f4 0, #fdf6f1 36%, #f9f0ea 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button, .badge, .eyebrow, .progress-text, .hint, .intro-chip,
+    .dim-item-score, .type-kicker, .index-item-name, .index-item-label,
+    .index-bar-labels, .top3-sim {
+      font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      font-weight: 700;
+    }
+
+    .shell {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px 16px 56px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-top: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -60px;
+      top: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(192, 122, 94, 0.14), rgba(192, 122, 94, 0.01));
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--accent-strong);
+      border: 1px solid var(--line);
+      background: var(--soft);
+      border-radius: 999px;
+      padding: 8px 12px;
+      margin-bottom: 16px;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .hero h1 {
+      font-size: clamp(26px, 5vw, 48px);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      max-width: 680px;
+    }
+
+    .hero .sub {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.75;
+      max-width: 680px;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .hero-minimal {
+      min-height: 52vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 42px 20px;
+    }
+
+    .hero-minimal::after { display: none; }
+    .hero-minimal h1 { max-width: none; }
+    .hero-actions-single { justify-content: center; margin-top: 28px; }
+
+    .intro-meta {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .intro-chip {
+      font-size: 13px;
+      color: var(--muted);
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 12px;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease;
+      font: inherit;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:disabled { cursor: not-allowed; opacity: 0.55; transform: none; }
+
+    .btn-primary {
+      background: var(--accent-strong);
+      color: #fff;
+      padding: 14px 24px;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(158, 92, 64, 0.2);
+      font-weight: 700;
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--accent-strong);
+      padding: 14px 20px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .test-wrap, .result-wrap {
+      margin-top: 22px;
+      padding: 22px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .progress {
+      flex: 1;
+      min-width: 240px;
+      height: 10px;
+      background: #f0e4dd;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress > span {
+      display: block;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #d4957a, #9e5c40);
+      border-radius: inherit;
+      transition: width .22s ease;
+    }
+
+    .progress-text {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .question-list { display: grid; gap: 16px; }
+
+    .question {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      background: linear-gradient(180deg, #ffffff, #fdf9f7);
+    }
+
+    .question-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      font-size: 12px;
+    }
+
+    .question-title {
+      font-size: 16px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .options { display: grid; gap: 10px; margin-top: 14px; }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease;
+    }
+
+    .option:hover { border-color: #d4b0a0; background: #fdf5f2; }
+
+    .option input {
+      margin-top: 3px;
+      accent-color: var(--accent-strong);
+      transform: scale(1.1);
+      flex-shrink: 0;
+    }
+
+    .option-code {
+      font-weight: 800;
+      color: var(--accent-strong);
+      min-width: 22px;
+      flex-shrink: 0;
+    }
+
+    .actions-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      padding-top: 6px;
+    }
+
+    .hint { color: var(--muted); font-size: 13px; line-height: 1.7; }
+
+    /* Result page */
+    .result-layout { display: grid; gap: 18px; }
+
+    .result-top {
+      display: grid;
+      grid-template-columns: 0.85fr 1.15fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .poster-box, .type-box, .index-box, .dim-box, .top3-box, .note-box {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      background: linear-gradient(180deg, #ffffff, #fdf9f7);
+    }
+
+    .poster-box {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(circle at top right, rgba(192,122,94,0.14), rgba(192,122,94,0) 40%),
+                  linear-gradient(180deg, #ffffff, #fdf6f1);
+    }
+
+    .poster-box::after {
+      content: "";
+      position: absolute;
+      right: -46px;
+      bottom: -46px;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(192,122,94,0.1), rgba(192,122,94,0.01));
+      pointer-events: none;
+    }
+
+    .poster-image {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 14px;
+      display: block;
+      position: relative;
+      z-index: 1;
+    }
+
+    .poster-box.no-image .poster-image { display: none; }
+
+    .poster-box.no-image {
+      justify-content: center;
+      align-items: center;
+    }
+
+    .poster-type-code {
+      font-size: clamp(36px, 7vw, 72px);
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--accent-strong);
+      opacity: 0.18;
+      line-height: 1;
+      position: relative;
+      z-index: 1;
+    }
+
+    .poster-caption {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.8;
+      position: relative;
+      z-index: 1;
+      font-style: italic;
+    }
+
+    .type-kicker {
+      font-size: 14px;
+      color: var(--accent-strong);
+      margin-bottom: 8px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .type-name {
+      font-size: clamp(28px, 4.5vw, 44px);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+
+    .type-en {
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      color: var(--muted);
+    }
+
+    .type-subname {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .type-intro {
+      margin-top: 16px;
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .match {
+      margin-top: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      color: var(--accent-strong);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .type-desc {
+      margin: 0;
+      line-height: 1.9;
+      font-size: 15px;
+      color: #2e1c15;
+      white-space: pre-line;
+    }
+
+    .desc-box {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 26px;
+      background: linear-gradient(180deg, #ffffff, #fdf9f7);
+    }
+
+    /* Index bars */
+    .index-box h3, .dim-box h3, .top3-box h3, .note-box h3 {
+      font-size: 16px;
+      margin-bottom: 14px;
+    }
+
+    .index-list { display: grid; gap: 28px; }
+
+    .index-item { }
+
+    .index-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 16px;
+    }
+
+    .index-item-name {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .index-item-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .index-bar-wrap {
+      position: relative;
+      height: 46px;
+      overflow: visible;
+      margin-top: 20px;
+    }
+
+    .index-bar-track {
+      position: absolute;
+      top: 14px;
+      left: 0;
+      right: 0;
+      height: 10px;
+      background: #f0e4dd;
+      border-radius: 999px;
+      overflow: visible;
+    }
+
+    .index-bar-fill {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      border-radius: 999px;
+      transition: all .4s ease;
+    }
+
+    .index-bar-fill.her-side {
+      right: 50%;
+      background: linear-gradient(270deg, #b8a8e8, #7a6fc0);
+      border-radius: 999px 0 0 999px;
+    }
+
+    .index-bar-fill.him-side {
+      left: 50%;
+      background: linear-gradient(90deg, #a8c0e0, #5c7a9e);
+      border-radius: 0 999px 999px 0;
+    }
+
+    .index-bar-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 3px;
+      height: 16px;
+      background: var(--line);
+      border-radius: 2px;
+      z-index: 2;
+    }
+
+    .index-bar-dot {
+      position: absolute;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      border: 3px solid var(--accent-strong);
+      transform: translate(-50%, -50%);
+      z-index: 3;
+      transition: left .4s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+
+    .index-bar-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 26px;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Dim list */
+    .dim-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .dim-group {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fff;
+      display: grid;
+      gap: 12px;
+    }
+
+    .dim-group-header {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-strong);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .dim-item {
+      border-top: 1px solid var(--soft);
+      padding-top: 10px;
+    }
+
+    .dim-item:first-of-type { border-top: none; padding-top: 0; }
+
+    .dim-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .dim-item-name { font-size: 14px; font-weight: 700; }
+
+    .dim-item-score {
+      color: var(--accent-strong);
+      font-weight: 800;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .dim-item p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+
+    @media (max-width: 700px) { .dim-list { grid-template-columns: 1fr; } }
+
+    /* Top 3 */
+    .top3-list { display: grid; gap: 10px; }
+
+    .top3-item {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .top3-item strong { display: block; margin-bottom: 2px; font-size: 15px; }
+    .top3-item span { color: var(--muted); font-size: 13px; }
+    .top3-sim { color: var(--accent-strong); font-weight: 800; font-size: 16px; white-space: nowrap; }
+
+    .note-box p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.8; }
+
+    .result-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    @media (max-width: 860px) {
+      .result-top { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 600px) {
+      .shell { padding: 14px 12px 42px; }
+      .hero, .test-wrap, .result-wrap { padding: 16px; }
+      .hero h1 { font-size: 28px; }
+      .question-title { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+
+    <!-- Screen 1: Intro -->
+    <section id="intro" class="screen active">
+      <div class="hero card hero-minimal">
+        <div class="eyebrow">CRTI · 伴侣关系类型测试</div>
+        <h1>你们是哪一种？</h1>
+        <div class="sub" style="margin-top:8px;font-size:12px;color:var(--muted);letter-spacing:0.02em;">Couple Relationship Type Indicator</div>
+        <div class="sub">16 种伴侣关系类型，单人作答，两个人可以各测一份再对照。<br>用"我们"的视角回答，大约 8 分钟。</div>
+        <div class="hero-actions hero-actions-single">
+          <button id="startBtn" class="btn-primary">开始测试</button>
+        </div>
+        <div class="intro-meta">
+          <span class="intro-chip">32 道题</span>
+          <span class="intro-chip">8 个维度</span>
+          <span class="intro-chip">三项关系指数</span>
+          <span class="intro-chip">无需注册，纯前端计算</span>
+        </div>
+        <div style="margin-top:18px;font-size:12px;color:var(--muted);font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;">
+          by X的Linote 🎃 &nbsp;@Alexjkman
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 2: Test -->
+    <section id="test" class="screen">
+      <div class="test-wrap card">
+        <div class="topbar">
+          <div class="progress"><span id="progressBar"></span></div>
+          <div class="progress-text" id="progressText">0 / 32</div>
+        </div>
+        <div id="questionList" class="question-list"></div>
+        <div class="actions-bottom">
+          <div class="hint" id="testHint">32 道题全部作答才能提交，不许跳过。</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <button id="backIntroBtn" class="btn-secondary">返回首页</button>
+            <button id="submitBtn" class="btn-primary" disabled>提交并查看结果</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Screen 3: Result -->
+    <section id="result" class="screen">
+      <div class="result-wrap card">
+        <div class="result-layout">
+
+          <div class="result-top">
+            <div class="poster-box" id="posterBox">
+              <img id="posterImage" class="poster-image" alt="关系类型图" />
+            </div>
+
+            <div class="type-box">
+              <div class="type-kicker" id="resultTypeCode">你们的关系类型</div>
+              <div class="type-name" id="resultTypeName">——</div>
+              <div class="type-en" id="resultTypeEn"></div>
+              <div class="type-subname" id="resultTypeSub"></div>
+              <div class="match" id="matchBadge"></div>
+              <div class="type-intro" id="resultIntro"></div>
+            </div>
+          </div>
+
+          <div class="desc-box">
+            <p class="type-desc" id="resultDesc"></p>
+          </div>
+
+          <div class="index-box">
+            <h3>三项关系指数</h3>
+            <div class="index-list" id="indexList"></div>
+          </div>
+
+          <div class="dim-box">
+            <h3>八维度解读</h3>
+            <div class="dim-list" id="dimList"></div>
+          </div>
+
+          <div class="top3-box">
+            <h3>最相近的其他类型</h3>
+            <div class="top3-list" id="top3List"></div>
+          </div>
+
+          <div class="note-box">
+            <h3>友情提示</h3>
+            <p id="noteText">本测试仅供娱乐与自我观察，不构成心理学诊断或关系咨询建议。两个人各自测一份再对照，往往比一个人测更有意思。</p>
+          </div>
+
+        </div>
+
+        <div class="result-actions">
+          <button id="restartBtn" class="btn-secondary">重新测试</button>
+          <button id="toTopBtn" class="btn-primary">回到首页</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    /* ─── Dimension meta ─── */
+    const dimensionMeta = {
+      d1: { name: '冲突模式',   axis: 1 },
+      d2: { name: '情感投入度', axis: 1 },
+      d3: { name: '摩擦频率',   axis: 1 },
+      d4: { name: '分工清晰度', axis: 1 },
+      d5: { name: '决策权归属', axis: 2 },
+      d6: { name: '情绪掌控权', axis: 2 },
+      d7: { name: '规则定义权', axis: 2 },
+      d8: { name: '资源控制权', axis: 2 },
+    };
+
+    /* ─── Questions ─── */
+    const questions = [
+      {
+        id: 'q1', dim: 'd1',
+        text: '"春节去谁家过"这道每年必考题，你们是怎么解的？',
+        options: [
+          { label: '坐下来谈，定出了双方都说得过去的方案', value: 3 },
+          { label: '有一方妥协了，但心里憋着', value: 2 },
+          { label: '谁嗓门大听谁的，或者干脆不谈这个话题', value: 1 },
+        ]
+      },
+      {
+        id: 'q2', dim: 'd1',
+        text: '上次你们认真吵架，是怎么收场的？',
+        options: [
+          { label: '说开了，有了结论，甚至比吵前更亲近了', value: 3 },
+          { label: '一方先道歉翻篇，根本问题没解决', value: 2 },
+          { label: '冷战自然结束，没说开，等着下次再爆', value: 1 },
+        ]
+      },
+      // d2
+      {
+        id: 'q3', dim: 'd2',
+        text: '对方发消息说"今天工作特别崩溃，被领导当众怼了"，你们接下来通常是？',
+        options: [
+          { label: '立刻追问细节，或者直接打电话来陪着说', value: 3 },
+          { label: '回几句安慰的话，让对方早点休息', value: 2 },
+          { label: '发个"加油"表情包，然后各自去做自己的事', value: 1 },
+        ]
+      },
+      {
+        id: 'q4', dim: 'd2',
+        text: '上次你"不是逢节日、不是被催促、纯粹因为想"而特意为对方做了什么，是多久前的事？',
+        options: [
+          { label: '就在最近，这种事对我们来说很正常', value: 3 },
+          { label: '有，但需要想一会儿，不是特别频繁了', value: 2 },
+          { label: '想了很久……已经很久没这样过了', value: 1 },
+        ]
+      },
+      // d3
+      {
+        id: 'q5', dim: 'd3',
+        text: '"老公打游戏/刷手机不带孩子/不做家务"这类矛盾，在你们关系里有没有？',
+        options: [
+          { label: '有，而且是长年老话题，时不时就要爆发', value: 3 },
+          { label: '偶尔有不满，但不是主要矛盾', value: 2 },
+          { label: '基本没有，这件事在我们这里没什么争议', value: 1 },
+        ]
+      },
+      {
+        id: 'q6', dim: 'd3',
+        text: '你们中有一方心情很差时，家里通常是什么状态？',
+        options: [
+          { label: '气场立刻蔓延，另一个人也跟着如履薄冰', value: 3 },
+          { label: '对方能感觉到，但日常还是正常运转', value: 2 },
+          { label: '各自消化，不太互相影响', value: 1 },
+        ]
+      },
+      // d4
+      {
+        id: 'q7', dim: 'd4',
+        text: '家里日常家务（做饭、洗碗、打扫、洗衣），是怎么分的？',
+        options: [
+          { label: '各有各的范围，基本不用每次协商', value: 3 },
+          { label: '大致有分工，但一方明显多干一些', value: 2 },
+          { label: '没有固定分工，谁有空谁来，或者主要靠一个人', value: 1 },
+        ]
+      },
+      {
+        id: 'q8', dim: 'd4',
+        text: '坐月子/生病/关键时刻，谁来照顾谁这件事，是提前说好的还是临时发现落差？',
+        options: [
+          { label: '提前说好了，责任清晰，执行时没什么意外', value: 3 },
+          { label: '有大致方向，但细节上出现过落差或争议', value: 2 },
+          { label: '没有提前说，结果是一方委屈，一方不知道发生了什么', value: 1 },
+        ]
+      },
+      // d5
+      {
+        id: 'q9', dim: 'd5',
+        text: '买房、买车或大件家电，最终谁的意见更有分量？',
+        options: [
+          { label: '男方，他的偏好基本决定了结果', value: 3 },
+          { label: '两个人共同，或者谁更懂谁来定', value: 2 },
+          { label: '女方，她的偏好基本决定了结果', value: 1 },
+        ]
+      },
+      {
+        id: 'q10', dim: 'd5',
+        text: '两个人对同一件事有明显不同的判断（比如孩子上哪所学校、换哪个城市发展），最后谁的方案被采用的概率更高？',
+        options: [
+          { label: '男方，他的判断基本就是最终决定', value: 3 },
+          { label: '谁更懂就听谁的，或者协商后各退一步', value: 2 },
+          { label: '女方，她的判断更难被推翻', value: 1 },
+        ]
+      },
+      // d6
+      {
+        id: 'q11', dim: 'd6',
+        text: '你们中谁更像情绪定调器——ta稳，家里就轻松；ta一不好，全家都要猜今天怎么了？',
+        options: [
+          { label: '女方，她的情绪是家里的天气预报', value: 3 },
+          { label: '两个人都会影响彼此，说不清谁更明显', value: 2 },
+          { label: '男方，他情绪一旦变化，全家气氛跟着变', value: 1 },
+        ]
+      },
+      {
+        id: 'q12', dim: 'd6',
+        text: '两个人闹了别扭之后，谁先软化、先开口？',
+        options: [
+          { label: '固定是同一个人每次先低头', value: 3 },
+          { label: '不固定，要看谁的问题更大', value: 2 },
+          { label: '两个人各自处理，冷一会儿自然就过了', value: 1 },
+        ]
+      },
+      // d7
+      {
+        id: 'q13', dim: 'd7',
+        text: '关于手机能不能查这件事，你们有没有明确谈过？',
+        options: [
+          { label: '谈过，两个人有共识，清楚边界在哪', value: 3 },
+          { label: '没正式谈，但有心照不宣的默契', value: 2 },
+          { label: '没谈过，靠感觉，曾经因此起过摩擦', value: 1 },
+        ]
+      },
+      {
+        id: 'q14', dim: 'd7',
+        text: '关于"什么算出轨""和异性朋友的边界在哪"，你们有没有统一的标准？',
+        options: [
+          { label: '谈过，两个人定义基本一致', value: 3 },
+          { label: '没正式谈，但大致有默契', value: 2 },
+          { label: '没谈过，两个人的理解可能不一样', value: 1 },
+        ]
+      },
+      // d8
+      {
+        id: 'q15', dim: 'd8',
+        text: '家里的存款、投资账户、大额资产，谁更清楚具体数字？',
+        options: [
+          { label: '男方，他掌握家里的财务全貌', value: 3 },
+          { label: '两个人互相了解，或者各管各的账户都透明', value: 2 },
+          { label: '女方，她是家里的CFO', value: 1 },
+        ]
+      },
+      {
+        id: 'q16', dim: 'd8',
+        text: '房产证、车登记、重要合同，写的是谁的名字？（如不适用：谁更主导了这些决定？）',
+        options: [
+          { label: '男方为主，关键资产在他名下或由他决定', value: 3 },
+          { label: '共同持有，或者说不清楚各占各的', value: 2 },
+          { label: '女方为主，关键资产在她名下或由她决定', value: 1 },
+        ]
+      },
+
+      // ── 第二轮：小红书争议话题 ──
+
+      // d1
+      {
+        id: 'q17', dim: 'd1',
+        text: '你和伴侣的父/母发生矛盾时，ta的第一反应是？',
+        options: [
+          { label: '立刻站在你这边，明确跟父母表态支持你', value: 3 },
+          { label: '当场两边和稀泥，事后私下来安慰你', value: 2 },
+          { label: '向着自己父母，让你多"理解"他们', value: 1 },
+        ]
+      },
+      {
+        id: 'q18', dim: 'd1',
+        text: '婆媳关系/翁婿关系这类"原生家庭vs小家庭"的矛盾，你们是怎么处理的？',
+        options: [
+          { label: '两个人立场统一，会专门坐下来谈，一起面对', value: 3 },
+          { label: '有时谈，但更多是谁被夹在中间谁受气', value: 2 },
+          { label: '对方不管或不愿介入，留你一个人面对', value: 1 },
+        ]
+      },
+      // d2
+      {
+        id: 'q19', dim: 'd2',
+        text: '诚实说，你们现在性生活的真实状态是？',
+        options: [
+          { label: '频率和质量都还不错，两个人都有意愿', value: 3 },
+          { label: '还行，偶尔清淡，整体没大问题', value: 2 },
+          { label: '频率很低，两个人都不太主动，已经有点室友化', value: 1 },
+        ]
+      },
+      {
+        id: 'q20', dim: 'd2',
+        text: '你们最近有没有纯粹聊天——不是讨论待办事项，只是聊聊彼此最近的状态或想法？',
+        options: [
+          { label: '有，而且是正常频率，不觉得稀少', value: 3 },
+          { label: '有，但不那么频繁了', value: 2 },
+          { label: '想不起来了，好像很久没这样了', value: 1 },
+        ]
+      },
+      // d3
+      {
+        id: 'q21', dim: 'd3',
+        text: '假设意外怀孕，你们最可能的第一反应是？',
+        options: [
+          { label: '两个人意见不一致，需要大吵或谈很久才能定方向', value: 3 },
+          { label: '会有分歧，但能比较快冷静下来商量', value: 2 },
+          { label: '大概率保持冷静，一起面对，不会演变成冲突', value: 1 },
+        ]
+      },
+      {
+        id: 'q22', dim: 'd3',
+        text: '孩子随谁姓、父母养老谁负责、要不要生二胎——这类话题在你们这里造成过多少摩擦？',
+        options: [
+          { label: '争过，而且可能还没有定论', value: 3 },
+          { label: '谈过，有摩擦，但大致有了共识', value: 2 },
+          { label: '没争过，要么本来就没分歧，要么还没谈到这步', value: 1 },
+        ]
+      },
+      // d4
+      {
+        id: 'q23', dim: 'd4',
+        text: '家里临时出现额外任务（孩子发烧、父母突然来访、设备坏了要修），通常是谁主动扛下来的？',
+        options: [
+          { label: '两个人都会第一时间响应，不需要等谁推', value: 3 },
+          { label: '有一方更主动，但另一方最终也会参与', value: 2 },
+          { label: '基本是固定的那个人在扛，另一方不太主动接手', value: 1 },
+        ]
+      },
+      {
+        id: 'q24', dim: 'd4',
+        text: '带孩子这件事，是谁在主要承担？"老公说自己是在帮老婆带孩子"——这句话在你们这里存不存在？',
+        options: [
+          { label: '两个人都是主责，不存在"帮"这个字', value: 3 },
+          { label: '有分工，但一方承担明显更多，另一方是辅助', value: 2 },
+          { label: '主要是一个人在带，另一个基本缺席或只是配角', value: 1 },
+        ]
+      },
+      // d5
+      {
+        id: 'q25', dim: 'd5',
+        text: '你们关系里，谁更"强势"？谁的意见更难被推翻？',
+        options: [
+          { label: '男方，他说了通常就是最终结论', value: 3 },
+          { label: '差不多，各有各强势的领域', value: 2 },
+          { label: '女方，她的判断更难被推翻', value: 1 },
+        ]
+      },
+      {
+        id: 'q26', dim: 'd5',
+        text: '谁的收入更高？谁是家里的主要经济支柱？',
+        options: [
+          { label: '男方，他挣的明显更多', value: 3 },
+          { label: '差不多，或者各自负责不同开销', value: 2 },
+          { label: '女方，她挣的明显更多', value: 1 },
+        ]
+      },
+      // d6
+      {
+        id: 'q27', dim: 'd6',
+        text: '关于性生活，你们有没有过"ta不想但我想"或"我想但ta总是太累"的长期不对等？',
+        options: [
+          { label: '有，这是一个敏感话题，经常需要一方迁就', value: 3 },
+          { label: '有过，但两个人都会互相照顾，基本能协调', value: 2 },
+          { label: '没什么问题，我们在这方面比较匹配', value: 1 },
+        ]
+      },
+      {
+        id: 'q28', dim: 'd6',
+        text: '当一方情绪出了问题（焦虑、压力大、低落），你们关系里谁更会主动察觉并走过来？',
+        options: [
+          { label: '有明显固定的那一方，每次都是ta先察觉、先主动', value: 3 },
+          { label: '两个人都会，但不总是同一个人', value: 2 },
+          { label: '两个人各处理各的，不太期待对方主动察觉', value: 1 },
+        ]
+      },
+      // d7
+      {
+        id: 'q29', dim: 'd7',
+        text: '婚后/同居后，钱怎么花、谁管账、储蓄目标是什么，是谁主导设定这些规则的？',
+        options: [
+          { label: '两个人坐下来商量过，有比较明确的规则', value: 3 },
+          { label: '有一方更主导，但没有正式讨论，是默认的', value: 2 },
+          { label: '没有规则，各自凭感觉，从来没认真谈过', value: 1 },
+        ]
+      },
+      {
+        id: 'q30', dim: 'd7',
+        text: '关于双方父母来家里住的频率和时长，你们有没有定过明确的规则？',
+        options: [
+          { label: '谈过，有共识，大家基本按这个执行', value: 3 },
+          { label: '没有明确规则，但有些心照不宣的默契', value: 2 },
+          { label: '完全没规则，每次临时决定，有时因此起摩擦', value: 1 },
+        ]
+      },
+      // d8
+      {
+        id: 'q31', dim: 'd8',
+        text: '婚后/同居后，谁掌握更多的财务控制权？',
+        options: [
+          { label: '男方，他管总账，或者他收入占比更高所以控制权更大', value: 3 },
+          { label: 'AA制或共同账户，两人权力差不多', value: 2 },
+          { label: '女方管钱，她的财务控制权更大', value: 1 },
+        ]
+      },
+      {
+        id: 'q32', dim: 'd8',
+        text: '彩礼/嫁妆/婚房，当初是怎么安排的？（或者：家里关键财产的归属，是谁说了算？）',
+        options: [
+          { label: '男方家/男方更主导，女方基本配合', value: 3 },
+          { label: '双方协商，各有各的底线', value: 2 },
+          { label: '女方家/女方更主导，男方基本配合', value: 1 },
+        ]
+      },
+    ];
+
+    /* ─── Type library ─── */
+    const TYPE_LIBRARY = {
+      'ALLY-HIM': {
+        cn: '他的节奏', en: 'HIS LEAD',
+        axes: '联盟型 × 男方主导',
+        intro: '他定，你配合，你们俩都觉得这样挺好。',
+        desc: '你们有一种让外人羡慕又看不太懂的默契——一个人说了，另一个人不反对，事情就往前走了。这不是凑合出来的，是某种真实的信任在背后撑着。你们很少在小事上耗，效率高，节奏稳，外人看你们会觉得：这两个人怎么这么省力。\n\n只是有时候，你会有一种很细微的感觉——某件事你其实有自己的判断，但好像没什么机会说完，说了也不一定被完整接住。不是他故意不听，只是他习惯了这个节奏，而你，也慢慢习惯了不说。这种感觉可能很轻，轻到你自己也没确认过，但它偶尔就是会浮上来。\n\n一段运转顺畅的关系，最大的风险不是外部的冲突，而是内部那些沉默的"算了"。你们已经有了最难得的东西——稳定和信任——缺的只是偶尔让他知道：你也有想法，你也在看，你不是只在配合。开口不会破坏你们的默契，它只会让这段默契，变得更真实一点。',
+      },
+      'ALLY-HER': {
+        cn: '她的节奏', en: 'HER LEAD',
+        axes: '联盟型 × 女方主导',
+        intro: '她掌舵，他跟上，这艘船开得挺稳。',
+        desc: '你们这段关系有一个核心运转逻辑：她先有答案，事情才往前走。这不是坏事——大多数关系都在等人拍板，而你们不需要等，效率是真实的，那种"你决定""不你来""随便"的无限循环，在你们这里基本不存在。\n\n但偶尔有一种感觉，可能她比他更清楚：那种一直在"主动"的疲惫。不是大事上的压力，而是那些细碎的、默认应该由她来想到的事情——这些加在一起，有时候会有点重。他可能真的没注意到，因为她一直做得很好，好到"她会处理"已经变成了一种默认。\n\n你们之间不缺配合，不缺信任，甚至不缺感情——你们缺的，是他真正"主动去完成一件事"的那种体验：不是被分配，不是被提醒，而是自己发现、自己推进、自己收尾。做到一次，她会感受到那种区别——那不是"谢谢帮忙"，而是"终于有人跟我一起了"。',
+      },
+      'ALLY-DUAL': {
+        cn: '双核联盟', en: 'DUAL LEAD',
+        axes: '联盟型 × 双主导',
+        intro: '合作时无敌，吵架时旁边的人想绕道走。',
+        desc: '你们是那种让外人看起来"这两个人真的很匹配"的类型——两个人都有想法，都有主见，讨论起正事来不用迁就也不用敷衍，效率高，出来的结果也好。这种匹配感是真实的，不是表演出来的。你们自己知道，这段关系能走到今天，靠的是两个人都没把自己降下去。\n\n但你们自己也清楚，这个优势有它的另一面。一旦两个人的想法不一致，那种"谁也不想先退"的僵持感就来了。不是因为谁不讲道理，而是因为两个人都觉得自己有道理——而且确实都有。外人看你们吵架可能很费解，但你们自己明白：这不是感情出了问题，是两个真实的人碰到了真实的分歧。\n\n你们最不需要学的是"如何表达自己"。你们最值得练习的是：说完自己的之后，真的去听对方的——不是等对方说完就开始准备反驳，而是听进去，然后真的更新自己的判断。这个动作不常见，但你们有做到的基础。做到了，你们能跑的距离，比大多数组合都要远。',
+      },
+      'ALLY-HIDE': {
+        cn: '隐形掌舵', en: 'QUIET LEAD',
+        axes: '联盟型 × 隐性主导',
+        intro: '一团和气，但有人在悄悄掌控方向。',
+        desc: '你们的关系对外看起来很平和——没有什么明显的主导者，遇事商量，有分歧也能化解，外人很难挑出什么毛病。你们自己也觉得还不错，感情是真实的，日子运转得也算顺畅。\n\n只是如果仔细回想，会发现某些决定的走向总有一种规律——某一方的意见更经常是最终结果，不是靠强迫，只是靠某种说不清楚的"默认"。主导的那方可能完全没意识到，另一方也可能只是隐约觉得"好像每次都是这样"，但没有认真去想这件事。你们都是聪明人，但有些事，人不刻意去想，就真的看不见。\n\n这不一定是坏事，很多这样的关系过得很顺。真正的风险在于：有一天另一方突然意识到了这个模式，而主导方还没准备好面对——那个时刻会很突然，会比你预期的难处理。趁你们现在都还在一团和气里，把这件事拿出来说说，不是在制造矛盾，是在加固你们已经有的东西。',
+      },
+      'PULL-HIM': {
+        cn: '热烈拉扯', en: 'HOT CLASH',
+        axes: '拉扯型 × 男方主导',
+        intro: '他说了算，但吵架他从来没赢过。',
+        desc: '你们这段关系里有一种很特别的能量：两个人都不是省油的灯，感情浓度高，摩擦也高，但就是分不开——这不是两件矛盾的事，这就是你们关系的质地。外人可能看不懂"这两个人怎么又吵又不分"，但你们自己是明白的：吵是因为在乎，不分是因为吵完还是想在一起。\n\n但你们也知道那个模式：争执出现，某一方退让，冷战自然结束，然后一切照旧——直到同一件事下次再触发。每次都很用力，但回头看好像没什么真正改变。那种"为什么我们总是在重复同一件事"的感觉，不是关系出了问题，而是你们还没找到一套"吵完之后怎么落地"的方式。\n\n你们有最难得的东西——在乎彼此的能量。缺的只是一个出口：吵完之后，能不能坐下来五分钟，不是为了谁认错，而是说清楚"这次是因为什么"。找到了这个出口，你们的能量会变成推力，而不是持续地消耗自己。',
+      },
+      'PULL-HER': {
+        cn: '她更上头', en: 'HER HEART',
+        axes: '拉扯型 × 女方主导',
+        intro: '她更在乎，所以她更累。',
+        desc: '你们的关系里有一种温度差——她的情感是浮在表面的，时刻感受得到；他的情感在，只是藏得更深，或者换了一种不那么明显的方式表达。这种差距不是谁的错，只是两个人的语言不同。但感受到落差的那一方，往往不是他。\n\n她可能有过这种时刻：觉得自己在这段关系里投入得更多——更主动，更在意，更多时候在维持这段连接。他不是不在，只是他不太是那个先迈那步的人。这种不对等会产生一种特定的疲惫，不是痛苦，只是有点累，有点"为什么每次都是我先开口"。\n\n这段关系真正的转折点，不是她变得更少投入，而是他开始"先迈那一步"。不用很大，不用完美，只是偶尔第一个发消息，偶尔主动安排一件事，偶尔在她什么都没说的时候问一句"你最近怎么了"。这些动作他觉得小，但她感受到的那种不同，会让他知道：这件事值得。',
+      },
+      'PULL-DUAL': {
+        cn: '双强对撞', en: 'DOUBLE FIRE',
+        axes: '拉扯型 × 双主导',
+        intro: '我们都很在乎，所以都快被对方逼疯了。',
+        desc: '你们的关系对外人来说很难定义——有时候像最好的朋友，有时候像天敌。那种激烈的碰撞感让旁观者替你们捏把汗，但你们自己明白：这不是感情出了问题，这就是你们的方式。两个人都是真实的，都有情绪，都不是在表演，这种真实本身是很多关系费很大力气都达不到的。\n\n但你们也知道那个成本：每次激烈过后，有一种特定的耗竭感。不是后悔，是累。而且是那种"下次还是会这样"的预感——因为你们找到了碰撞的方式，但还没完全找到落地的方式。同一个问题，来了一遍又一遍，每次都很用力，但没有沉淀。\n\n你们不需要学"少吵"——那是要求你们变成不同的人。你们需要的是"吵完之后往前走"的能力：一个暂停键，一个复盘的时间，一个哪怕不完美的共识。有了这个机制，你们的激烈会变成这段关系最硬的基底，而不是消耗它的东西。',
+      },
+      'PULL-HIDE': {
+        cn: '闷声拉扯', en: 'SILENT TUG',
+        axes: '拉扯型 × 隐性主导',
+        intro: '我们不怎么大吵，但我一直有种说不清的憋。',
+        desc: '你们的关系对外人来说看起来还好——没有什么大吵大闹，日子也过得下去。但有一方心里有一种说不清楚的憋：不是具体的委屈，而是那种"我怎么每次都是那个退让的人"的疑惑，以及"说了好像也没什么用"的疲惫。这种感觉可能断断续续，但它一直在。\n\n那种"我以为我们在商量，但结果每次都是这样"——不是在指控，而是在描述一种真实存在的结构。主导的一方可能完全没意识到，他们会说"是你自己同意的"，这是真的。但"同意"不等于"这就是我想要的"，而这个区别，一直没有被说出来。\n\n最难的地方在于，这种不平衡很难被明确指出来——因为从每一件单独的事来看，都说得过去。但它的累积是真实的。你所需要的，不是一次大吵，而是一次"我们能不能聊聊最近这种感觉"的开口。不需要结论，只需要被听见一次，那种憋就会轻一些。',
+      },
+      'ROLE-HIM': {
+        cn: '传统分工', en: 'CLASSIC ORDER',
+        axes: '分工型 × 男方主导',
+        intro: '各有各的位置，日子过得去，不折腾。',
+        desc: '你们的日子有一种外人很难复制的稳定感。不是靠什么特别的感情技巧，而是靠清晰：各自知道自己该做什么，边界在哪，不需要每次都重新谈。这种稳定是很多关系花很长时间也建不起来的，你们建起来了，不管用了什么方式，这本身就是一种能力。\n\n只是稳定有它的代价：分工清晰之后，情感表达的空间会慢慢收窄。没什么大事要谈，就真的不怎么聊了——不是感情变淡，而是两个人都以为"好好过日子"本身就等于"我在乎你"。但那种"就是想告诉你今天发生了一件小事"的冲动，如果一直没有出口，迟早会消失在"算了"里。\n\n你们之间不需要大改变——你们的结构是稳固的。需要的只是一点"无用"的时间：不是为了解决什么，只是聊聊，或者一起发一会儿呆。这种"无意义"，恰好是维持长期关系最便宜的方式。',
+      },
+      'ROLE-HER': {
+        cn: '家庭中枢', en: 'HOME CORE',
+        axes: '分工型 × 女方主导',
+        intro: '她管着，你别捣乱就行。',
+        desc: '她对这个家的运维，有一种外人看不太清楚的复杂性。不是某一件事让她很累，而是那些没有名字的事——记着的、安排的、防患于未然的、不让它出问题的——这些加在一起，形成了一种持续的、隐形的工作量。她自己有时候也说不清楚，只是感觉总有什么在等着她处理。\n\n他不是不尽力，只是他大部分时候是在她划好的框架里执行，而那个框架本身是她在维护的。这个差别不容易被察觉，因为"帮忙做了"和"主动发现并处理了"看起来很像，但感受起来完全不同。那种"为什么每次都要我提醒你"，背后说的就是这个。\n\n她真正想要的，不是感谢，而是他真正接手一件事的完整体验——发现、决定、执行、收尾，不用她参与任何一步。这件事对他来说可能需要刻意去做，但值得，因为她感受到的那种"终于有人接住了"，是"谢谢帮忙"完全给不了的东西。',
+      },
+      'ROLE-DUAL': {
+        cn: '合伙婚姻', en: 'POWER PAIR',
+        axes: '分工型 × 双主导',
+        intro: '效率极高，偶尔才想起来我们是情侣。',
+        desc: '你们看起来像一支配合默契的队伍——各有各的职责，执行高效，对外是让人羡慕的组合。你们并不觉得这有什么问题，也不觉得独立是冷漠的代名词：各自完整，然后在需要的时候无缝对接，这是一种成熟，不是距离。你们心里都清楚这一点。\n\n但你们可能都有过那种感觉：你们在一起讨论的，几乎都是事——待办清单、计划、下一步怎么走——而那种纯粹的、没有目的的"我就是想告诉你"，已经很久没有出现了。不是感情出了问题，只是"合伙模式"慢慢占领了所有对话的空间。\n\n你们不需要改变你们高效的运转方式，只需要在日程里留出一块不谈事的时间——不是正式的，不是计划好的，只是"今天不处理任何事，随便聊聊"。这件事看起来没什么产出，但它在做效率做不到的事：提醒你们，除了互相信任的合伙人，你们还是彼此喜欢的那个人。',
+      },
+      'ROLE-HIDE': {
+        cn: '倾斜分工', en: 'HIDDEN HAND',
+        axes: '分工型 × 隐性主导',
+        intro: '表面上各管各的，实际有人管得更多。',
+        desc: '你们的关系运转顺畅，从外面看不出什么大问题——分工清晰，日子稳定，两个人都在各自的位置上。但如果仔细回看，会发现某些类型的决定总是同一个人在做，另一方经常是"已经定好了"的接收者，而不是参与者。\n\n这种结构不是恶意设计的，往往只是"顺手"——某一方比较有想法，另一方比较爽快，慢慢默认成了某种分工。但被动接受的那一方，有时候会有一种轻微的感受，不是委屈，只是那种"我们的生活好像越来越不是我在决定的"的疑惑。这种感受不常浮出水面，但它一直在。\n\n很多这样的关系过得很顺，因为主导的一方也确实做得不差。真正的风险不是现在，而是某天被主导的一方突然想要说话的权利——而另一方还没有准备好倾听。趁还没到那一步，说一说"你觉得这段时间我们的决策是公平的吗"——不是挑衅，是预防。',
+      },
+      'LEAN-HIM': {
+        cn: '她在硬扛', en: 'SHE CARRIES',
+        axes: '失衡型 × 男方主导',
+        intro: '他定方向，她来撑，两本账没对上。',
+        desc: '你们这段关系里有一种不对等，可能很难被精确描述，但你感受得到。他在方向和决策上占主导，而日常真正让这段关系运转的那些事——那些没有名字的、细碎的、情绪性的劳动——很多都压在了另一个方向上。两个人都说"我也很累"，这也是真的。只是两个人的累不在同一张账本上，算不到一起。\n\n那种"他不是坏人，他也很努力，但为什么我感觉自己在独自撑着这段关系"——这个感受里没有夸张成分。不是他没有付出，是他付出的方向和你承担的方向，没有完全对上。这件事不是谁的错，但它是真实存在的。\n\n你们这段关系不需要彻底重组，需要的只是一件事先被完成：说出来。不是为了指责，而是为了让他知道你在承担什么。"我看到你在扛"这句话，有时候比任何实质性的改变都更先到达——它不是终点，但它是可以开始改变的那扇门。',
+      },
+      'LEAN-HER': {
+        cn: '独自维系', en: 'SHE HOLDS',
+        axes: '失衡型 × 女方主导',
+        intro: '她在撑，他不一定知道，知道了也没说。',
+        desc: '她在这段关系里做的事情，有很大一部分是隐形的——不是洗碗做饭那种可以被看见的，而是那些没有名字的：感知对方情绪的变化，记着两个人的重要日子，在关系开始冷淡的时候主动暖回来，在吵完架之后想着怎么开口才能让两个人都不难受。这些事加在一起，比一份全职工作的工作量少不了多少，但它没有下班时间，也没有人说"辛苦了"。\n\n他不是故意忽视的，只是这些事在他的感知里不够"可见"——能看到洗干净的碗，但看不到"主动维持关系温度"这件事。所以他不知道这些在发生，更不知道它在消耗她。那种"我已经很累了，但他不知道我在撑什么"——不是在埋怨，是在描述一种每天都在发生的事实。\n\n你们之间的问题不是他不在乎，而是他不知道。而她，可能已经太习惯"自己扛"了，习惯到不说出来变成了默认选项。说出来吧——不需要说得完整，只是让他知道：这些事我一直在做，我很累了，我需要你接住一些。说出来，他才有机会看见。',
+      },
+      'LEAN-DUAL': {
+        cn: '反向用力', en: 'MISALIGNED',
+        axes: '失衡型 × 双主导',
+        intro: '我们都很努力，但好像在反向用力。',
+        desc: '你们的情况有一种外人很难看清楚的矛盾：两个人都在用力，都觉得自己在付出，也都觉得自己付出得更多——但关系整体是失衡的。这不是谁在撒谎，而是两个人的用力方向没有指向同一个地方。你们的能量是真实的，你们的疲惫也是真实的，只是这两件事没有互相转化。\n\n双方都有主见，都不太愿意先退，在这种关系里特别容易出现一种模式：与其说是合力，不如说是各自在维护自己的立场、保护自己不吃亏。这些能量加在一起，不是在推关系往前走，而是让两个人原地踏步，越来越累，越来越疏远，但谁也说不清是从哪里开始的。\n\n你们不需要更努力，你们需要的是一次真正的"对齐"——坐下来，不是为了证明自己有道理，而是为了弄清楚"我们现在是不是真的在往同一个方向走"。这件事做了，你们的力气才能真正变成合力，而不是继续相互抵消。',
+      },
+      'LEAN-HIDE': {
+        cn: '静默消耗', en: 'QUIET DRAIN',
+        axes: '失衡型 × 隐性主导',
+        intro: '没有大矛盾，就是越来越累，越来越不想说话。',
+        desc: '你们的关系表面上没有什么大矛盾，外人看起来还好，甚至平静——但有一个人心里有一种积累了很久的重量，说不太清楚是什么，只是越来越累，越来越不想开口，越来越觉得"算了"。不是某一件具体的事让你走到这里，而是很多件小事叠在了一起，每一件单独说都算不上什么，但放在一起，就是那种"我好像在一点一点消失"的感觉。\n\n另一方可能完全没意识到这个状态，因为什么都没有被说出来——或者说过几次，但不了了之，于是慢慢就不说了。那种"跟他说了也没用"的判断，一旦形成就很难打破，因为不说就真的没有任何改变，而"没有改变"又在证明"说了也没用"。这是一个很安静的循环。\n\n打破它的方式，不需要一场大谈话，也不需要一个完整的解决方案。只需要说："我最近有种说不出来的感觉，我们能聊聊吗。"说完不需要对方立刻懂，只需要对方真的停下来听一下。那个"停下来听"，可能就是这段关系很久以来最需要的事。',
+      },
+    };
+
+    /* ─── Dimension explanations ─── */
+    const DIM_EXPLANATIONS = {
+      d1: {
+        L: '遇事能躲就躲，矛盾大多靠时间消化，偶尔是积累而不是解决。',
+        M: '能说开一些，有时候也会各自消化，看情况决定要不要谈。',
+        H: '愿意把问题摆出来谈，冲突之后关系往往不会变差，有时反而更近。',
+      },
+      d2: {
+        L: '两个人各有自己的世界，情感连接相对独立，不太需要时刻在线。',
+        M: '有在乎，但不会时刻挂心，保持着适当的情感距离。',
+        H: '情感投入度高，对方的喜怒哀乐很难完全置身事外。',
+      },
+      d3: {
+        L: '日常摩擦很少，两个人都不太爱争，或者已经磨合得很顺畅了。',
+        M: '偶尔有小争执，不至于影响大局，还在可以承受的范围内。',
+        H: '鸡毛蒜皮也能擦出火花，情感浓度高，摩擦也高，是标配。',
+      },
+      d4: {
+        L: '分工比较模糊，通常是谁有空谁来，或者一个人默默扛大头。',
+        M: '有大致分工，但边界不那么清晰，有时会重叠或真空地带。',
+        H: '各有明确职责，遇事不需要临时协商，效率高，节奏稳。',
+      },
+      d5: {
+        L: '大方向上女方更有话语权，男方更多时候是跟随和配合。',
+        M: '两个人都有参与感，或者各管各的地盘，决策权比较分散。',
+        H: '大事小情男方拍板的概率更高，关系的节奏由男方来定义。',
+      },
+      d6: {
+        L: '情绪不怎么外露，两个人都比较独立地管理自己的状态。',
+        M: '情绪会互相影响，但不会完全左右全天气氛，有一定缓冲。',
+        H: '某一方的情绪对整个关系的温度影响很大，好时很好，差时很差。',
+      },
+      d7: {
+        L: '关系里没有明确的边界和规矩，靠默契和感觉走，有些东西没说清楚。',
+        M: '有些心照不宣的规矩，但没有正式谈过，是隐形共识。',
+        H: '有比较清晰的边界共识，彼此知道预期和底线在哪里。',
+      },
+      d8: {
+        L: '女方更掌握家里的经济和信息资源，是家里的账本和档案。',
+        M: '双方各有掌握，或者共同管理，资源信息比较平衡透明。',
+        H: '男方更掌握经济大权和家庭重要信息，是家里的信息枢纽。',
+      },
+    };
+
+    /* ─── Axis vectors ─── */
+    // Axis 1: dims d1-d4, H=3 M=2 L=1
+    const AXIS1_TYPES = [
+      { code: 'ALLY', vec: [3, 3, 1, 2] },
+      { code: 'PULL', vec: [2, 3, 3, 1] },
+      { code: 'ROLE', vec: [1, 2, 1, 3] },
+      { code: 'LEAN', vec: [1, 1, 2, 1] },
+    ];
+
+    // Axis 2: dims d5-d8
+    const AXIS2_TYPES = [
+      { code: 'HIM',  vec: [3, 2, 2, 3] },
+      { code: 'HER',  vec: [1, 3, 2, 1] },
+      { code: 'DUAL', vec: [2, 3, 3, 2] },
+      { code: 'HIDE', vec: [2, 1, 3, 2] },
+    ];
+
+    /* ─── App state ─── */
+    const app = { answers: {}, shuffled: [] };
+
+    const screens = {
+      intro: document.getElementById('intro'),
+      test:  document.getElementById('test'),
+      result: document.getElementById('result'),
+    };
+
+    /* ─── Helpers ─── */
+    function showScreen(name) {
+      Object.entries(screens).forEach(([k, el]) => el.classList.toggle('active', k === name));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    // 4 questions per dim → raw range 4–12
+    function sumToLevel(score) {
+      if (score <= 7)  return 'L';
+      if (score <= 9)  return 'M';
+      return 'H';
+    }
+
+    function levelNum(level) { return { L: 1, M: 2, H: 3 }[level]; }
+
+    function euclidean(a, b) {
+      return Math.sqrt(a.reduce((s, v, i) => s + (v - b[i]) ** 2, 0));
+    }
+
+    /* ─── Render questions ─── */
+    function renderQuestions() {
+      const list = document.getElementById('questionList');
+      list.innerHTML = '';
+      app.shuffled.forEach((q, idx) => {
+        const card = document.createElement('article');
+        card.className = 'question';
+        card.innerHTML = `
+          <div class="question-meta">
+            <div class="badge">第 ${idx + 1} 题</div>
+            <div style="color:var(--muted);font-size:12px;">维度已隐藏</div>
+          </div>
+          <div class="question-title">${q.text}</div>
+          <div class="options">
+            ${q.options.map((opt, i) => {
+              const code = ['A', 'B', 'C'][i];
+              const checked = app.answers[q.id] === opt.value ? 'checked' : '';
+              return `<label class="option">
+                <input type="radio" name="${q.id}" value="${opt.value}" ${checked} />
+                <div class="option-code">${code}</div>
+                <div>${opt.label}</div>
+              </label>`;
+            }).join('')}
+          </div>
+        `;
+        list.appendChild(card);
+      });
+
+      list.querySelectorAll('input[type="radio"]').forEach(input => {
+        input.addEventListener('change', e => {
+          app.answers[e.target.name] = Number(e.target.value);
+          updateProgress();
+        });
+      });
+
+      updateProgress();
+    }
+
+    function updateProgress() {
+      const total = app.shuffled.length;
+      const done = app.shuffled.filter(q => app.answers[q.id] !== undefined).length;
+      const pct = total ? (done / total) * 100 : 0;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+      document.getElementById('progressText').textContent = `${done} / ${total}`;
+      const complete = done === total && total > 0;
+      document.getElementById('submitBtn').disabled = !complete;
+      document.getElementById('testHint').textContent = complete
+        ? '全部做完了，可以提交了。'
+        : '32 道题全部作答才能提交，不许跳过。';
+    }
+
+    /* ─── Scoring ─── */
+    function computeResult() {
+      const rawScores = { d1: 0, d2: 0, d3: 0, d4: 0, d5: 0, d6: 0, d7: 0, d8: 0 };
+      questions.forEach(q => { rawScores[q.dim] += Number(app.answers[q.id] || 0); });
+
+      const levels = {};
+      Object.keys(rawScores).forEach(dim => { levels[dim] = sumToLevel(rawScores[dim]); });
+
+      const ax1vec = ['d1', 'd2', 'd3', 'd4'].map(d => levelNum(levels[d]));
+      const ax2vec = ['d5', 'd6', 'd7', 'd8'].map(d => levelNum(levels[d]));
+
+      let bestAx1 = AXIS1_TYPES[0], bestD1 = Infinity;
+      AXIS1_TYPES.forEach(t => {
+        const d = euclidean(ax1vec, t.vec);
+        if (d < bestD1) { bestD1 = d; bestAx1 = t; }
+      });
+
+      let bestAx2 = AXIS2_TYPES[0], bestD2 = Infinity;
+      AXIS2_TYPES.forEach(t => {
+        const d = euclidean(ax2vec, t.vec);
+        if (d < bestD2) { bestD2 = d; bestAx2 = t; }
+      });
+
+      const typeCode = bestAx1.code + '-' + bestAx2.code;
+      const userVec8 = [...ax1vec, ...ax2vec];
+
+      // Rank all 16 types
+      const allTypes = [];
+      AXIS1_TYPES.forEach(a1 => {
+        AXIS2_TYPES.forEach(a2 => {
+          const code = a1.code + '-' + a2.code;
+          const vec = [...a1.vec, ...a2.vec];
+          const dist = euclidean(userVec8, vec);
+          const maxDist = Math.sqrt(8 * 4); // max possible
+          const similarity = Math.max(0, Math.round((1 - dist / maxDist) * 100));
+          allTypes.push({ code, dist, similarity });
+        });
+      });
+      allTypes.sort((a, b) => a.dist !== b.dist ? a.dist - b.dist : b.similarity - a.similarity);
+
+      // Index values 0=female(left) … 1=male(right)
+      // Each dim now sums 4 questions → range 4–12
+      const d3 = rawScores.d3, d4 = rawScores.d4;
+      const d5 = rawScores.d5, d6 = rawScores.d6;
+      const d7 = rawScores.d7, d8 = rawScores.d8;
+
+      const decisionIndex  = (d5 + d7 - 8)  / 16;         // range 8–24 → 0–1, high=male
+      const emotionIndex   = 1 - (d6 + d3 - 8) / 16;      // high d6=female emotional → invert
+      const realityIndex   = (d8 - d4 + 8)  / 16;          // high d8 & low d4 → male side
+
+      return {
+        rawScores, levels, typeCode,
+        decisionIndex:  Math.min(1, Math.max(0, decisionIndex)),
+        emotionIndex:   Math.min(1, Math.max(0, emotionIndex)),
+        realityIndex:   Math.min(1, Math.max(0, realityIndex)),
+        allTypes,
+        primarySimilarity: allTypes[0].similarity,
+      };
+    }
+
+    /* ─── Render index bar ─── */
+    function renderIndexBar(name, value, herLabel, himLabel) {
+      const pct = value * 100;
+      const deviation = Math.abs(value - 0.5) * 100;
+      const side = value < 0.5 ? 'her-side' : 'him-side';
+      const fillStyle = side === 'her-side'
+        ? `right: 50%; width: ${deviation}%;`
+        : `left: 50%; width: ${deviation}%;`;
+      const label = value < 0.4 ? `偏${herLabel}` : value > 0.6 ? `偏${himLabel}` : '相对均衡';
+
+      return `
+        <div class="index-item">
+          <div class="index-item-header">
+            <div class="index-item-name">${name}</div>
+            <div class="index-item-label">${label}</div>
+          </div>
+          <div class="index-bar-wrap">
+            <div class="index-bar-track">
+              <div class="index-bar-fill ${side}" style="${fillStyle}"></div>
+              <div class="index-bar-center"></div>
+              <div class="index-bar-dot" style="left: ${pct}%"></div>
+            </div>
+            <div class="index-bar-labels">
+              <span>${herLabel}</span>
+              <span>均衡</span>
+              <span>${himLabel}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /* ─── Render result ─── */
+    function renderResult() {
+      const result = computeResult();
+      const typeData = TYPE_LIBRARY[result.typeCode];
+
+      // Type box
+      document.getElementById('resultTypeCode').textContent = result.typeCode;
+      document.getElementById('resultTypeName').textContent = typeData.cn;
+      document.getElementById('resultTypeEn').textContent = typeData.en;
+      document.getElementById('resultTypeSub').textContent = typeData.axes;
+      document.getElementById('matchBadge').textContent = `匹配度 ${result.primarySimilarity}%`;
+      document.getElementById('resultDesc').textContent = typeData.desc;
+
+      // Poster
+      const posterBox = document.getElementById('posterBox');
+      const posterImage = document.getElementById('posterImage');
+      const imgSrc = `./image/${result.typeCode}.png`;
+      posterImage.src = imgSrc;
+      posterImage.alt = typeData.cn;
+      posterImage.onerror = () => { posterBox.classList.add('no-image'); };
+      posterImage.onload = () => { posterBox.classList.remove('no-image'); };
+      document.getElementById('resultIntro').textContent = typeData.intro;
+
+      // Index bars
+      document.getElementById('indexList').innerHTML =
+        renderIndexBar('决策权指数',   result.decisionIndex, '女方偏高', '男方偏高') +
+        renderIndexBar('情绪主导指数', result.emotionIndex,  '女方偏高', '男方偏高') +
+        renderIndexBar('现实承担指数', result.realityIndex,  '女方偏高', '男方偏高');
+
+      // Dimension list — 4 themed groups
+      const DIM_GROUPS = [
+        { label: '关系温度', dims: ['d1', 'd2'] },
+        { label: '日常运转', dims: ['d3', 'd4'] },
+        { label: '权力格局', dims: ['d5', 'd6'] },
+        { label: '底层结构', dims: ['d7', 'd8'] },
+      ];
+      document.getElementById('dimList').innerHTML = DIM_GROUPS.map(group => {
+        const items = group.dims.map(dim => {
+          const level = result.levels[dim];
+          const raw = result.rawScores[dim];
+          return `
+            <div class="dim-item">
+              <div class="dim-item-top">
+                <div class="dim-item-name">${dimensionMeta[dim].name}</div>
+                <div class="dim-item-score">${level} · ${raw}分</div>
+              </div>
+              <p>${DIM_EXPLANATIONS[dim][level]}</p>
+            </div>`;
+        }).join('');
+        return `<div class="dim-group"><div class="dim-group-header">${group.label}</div>${items}</div>`;
+      }).join('');
+
+      // Top 3 (excluding primary)
+      const others = result.allTypes.filter(t => t.code !== result.typeCode).slice(0, 3);
+      document.getElementById('top3List').innerHTML = others.map((t, i) => {
+        const td = TYPE_LIBRARY[t.code];
+        return `
+          <div class="top3-item">
+            <div>
+              <strong>${t.code}（${td.cn}）</strong>
+              <span>${td.axes}</span>
+            </div>
+            <div class="top3-sim">${t.similarity}%</div>
+          </div>
+        `;
+      }).join('');
+
+      showScreen('result');
+    }
+
+    /* ─── Event listeners ─── */
+    function startTest() {
+      app.answers = {};
+      app.shuffled = shuffle(questions);
+      renderQuestions();
+      showScreen('test');
+    }
+
+    document.getElementById('startBtn').addEventListener('click', startTest);
+    document.getElementById('backIntroBtn').addEventListener('click', () => showScreen('intro'));
+    document.getElementById('submitBtn').addEventListener('click', renderResult);
+    document.getElementById('restartBtn').addEventListener('click', startTest);
+    document.getElementById('toTopBtn').addEventListener('click', () => showScreen('intro'));
+  </script>
+</body>
+</html>
