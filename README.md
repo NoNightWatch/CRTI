@@ -1,5 +1,7 @@
 # CRTI · 伴侣关系类型测试
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/NoNightWatch/CRTI)
+
 **Couple Relationship Type Indicator**
 
 一个单页测试，帮你和伴侣看清你们的关系模式。16种类型，32道题，纯前端，无后端，无需登录。
